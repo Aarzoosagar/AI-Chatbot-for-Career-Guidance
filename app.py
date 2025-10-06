@@ -4,7 +4,7 @@ import numpy as np
 import json
 import pickle
 
-# Load pre-trained model and artifacts
+# Load model and artifacts
 model = tf.keras.models.load_model('models/career_chatbot_model.h5')
 
 with open('models/tokenizer.pickle', 'rb') as f:
@@ -18,7 +18,7 @@ with open('response_templates.json', 'r') as f:
 
 app = Flask(__name__)
 
-# Helper function to predict intent and get response
+# Function to get bot response
 def get_bot_response(user_input):
     seq = tokenizer.texts_to_sequences([user_input])
     padded = tf.keras.preprocessing.sequence.pad_sequences(seq, maxlen=50, padding='post')
@@ -26,10 +26,12 @@ def get_bot_response(user_input):
     intent = label_encoder.inverse_transform([np.argmax(pred)])[0]
     return np.random.choice(responses[intent])
 
+# Serve the HTML page
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return render_template('index.html')  # <- Flask serves templates/index.html
 
+# Chatbot endpoint
 @app.route('/get', methods=['POST'])
 def chat():
     user_msg = request.form['msg']
